@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+ "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>PayloadContent</key>
+  <array>
+    <dict>
+      <key>PayloadType</key>
+      <string>com.apple.webClip.managed</string>
+      <key>PayloadVersion</key>
+      <integer>1</integer>
+      <key>PayloadIdentifier</key>
+      <string>com.panfitrion.wrestling.webclip</string>
+      <key>PayloadUUID</key>
+      <string>6F9619FF-8B86-D011-B42D-00C04FC964FF</string>
+      <key>PayloadDisplayName</key>
+      <string>Wrestling</string>
+      <key>Label</key>
+      <string>Wrestling</string>
+      <key>URL</key>
+      <string>https://panfitrion.github.io/Wrestling/</string>
+      <key>FullScreen</key>
+      <true/>
+      <key>IsRemovable</key>
+      <true/>
+    </dict>
+  </array>
+  <key>PayloadType</key>
+  <string>Configuration</string>
+  <key>PayloadVersion</key>
+  <integer>1</integer>
+  <key>PayloadIdentifier</key>
+  <string>com.panfitrion.wrestling.profile</string>
+  <key>PayloadUUID</key>
+  <string>7F9619FF-8B86-D011-B42D-00C04FC964FF</string>
+  <key>PayloadDisplayName</key>
+  <string>Instalar Wrestling</string>
+  <key>PayloadDescription</key>
+  <string>Agrega Wrestling a la pantalla de inicio.</string>
+  <key>PayloadOrganization</key>
+  <string>Panfitrion</string>
+</dict>
+</plist>
