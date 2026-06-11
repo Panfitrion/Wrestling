@@ -62,6 +62,142 @@ function v1(o){let g;return g=o.match(/(\w{3,9})\.?\s+(\d{1,2}),\s*(\d{4})/),g&&
   </head>
   <body>
     <div id="root"></div>
-    <script src="/wwe-local.js"></script>
+    <script>
+      (function () {
+        const toast = document.createElement("div");
+        toast.setAttribute("id", "iphone-download-toast");
+        toast.style.cssText = [
+          "position:fixed",
+          "left:50%",
+          "bottom:20px",
+          "transform:translateX(-50%)",
+          "max-width:min(92vw,420px)",
+          "padding:12px 14px",
+          "border-radius:12px",
+          "background:rgba(15,23,42,.94)",
+          "color:#fff",
+          "font:500 14px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+          "box-shadow:0 12px 32px rgba(0,0,0,.35)",
+          "z-index:99999",
+          "opacity:0",
+          "pointer-events:none",
+          "transition:opacity .2s ease"
+        ].join(";");
+        document.addEventListener("DOMContentLoaded", function () {
+          document.body.appendChild(toast);
+        });
+
+        let toastTimer = null;
+        function showToast(message) {
+          toast.textContent = message;
+          toast.style.opacity = "1";
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(function () {
+            toast.style.opacity = "0";
+          }, 2600);
+        }
+
+        function isAppleMobile() {
+          const ua = navigator.userAgent || "";
+          return /iPhone|iPad|iPod/i.test(ua);
+        }
+
+        function setButtonState(anchor, label, busy) {
+          const span = anchor.querySelector("span");
+          if (span) span.textContent = label;
+          anchor.style.opacity = busy ? "0.7" : "";
+          anchor.style.pointerEvents = busy ? "none" : "";
+        }
+
+        async function downloadToFiles(anchor) {
+          const url = anchor.getAttribute("href");
+          const filename = anchor.getAttribute("download") || "video";
+          if (!url) return;
+
+          setButtonState(anchor, "Preparando...", true);
+
+          try {
+            const response = await fetch(url, { credentials: "omit" });
+            if (!response.ok) {
+              throw new Error("HTTP " + response.status);
+            }
+
+            const blob = await response.blob();
+            const file = typeof File === "function"
+              ? new File([blob], filename, { type: blob.type || "video/mp4" })
+              : null;
+
+            if (
+              file &&
+              navigator.canShare &&
+              navigator.canShare({ files: [file] }) &&
+              navigator.share
+            ) {
+              await navigator.share({ files: [file], title: filename });
+              showToast("Se abrio Compartir para guardarlo en Archivos.");
+            } else {
+              const objectUrl = URL.createObjectURL(blob);
+              const temp = document.createElement("a");
+              temp.href = objectUrl;
+              temp.download = filename;
+              temp.style.display = "none";
+              document.body.appendChild(temp);
+              temp.click();
+              temp.remove();
+              setTimeout(function () {
+                URL.revokeObjectURL(objectUrl);
+              }, 1000);
+              showToast("Descarga iniciada.");
+            }
+          } catch (error) {
+            console.error("No se pudo forzar la descarga en iPhone:", error);
+            showToast("Safari no permitio bajar este archivo directo. Prueba mantener pulsado y Guardar en Archivos.");
+          } finally {
+            setButtonState(anchor, "Descargar", false);
+          }
+        }
+
+        function patchDownloadButtons(root) {
+          const scope = root && root.querySelectorAll ? root : document;
+          const anchors = scope.querySelectorAll('a[title="Descargar episodio"]');
+          anchors.forEach(function (anchor) {
+            if (anchor.dataset.iosDownloadPatched === "1") return;
+            anchor.dataset.iosDownloadPatched = "1";
+            anchor.setAttribute("target", "_self");
+            anchor.setAttribute("rel", "noopener noreferrer");
+            anchor.addEventListener("click", function (event) {
+              event.preventDefault();
+              event.stopPropagation();
+              if (event.stopImmediatePropagation) {
+                event.stopImmediatePropagation();
+              }
+              if (isAppleMobile()) {
+                downloadToFiles(anchor);
+              } else {
+                const href = anchor.getAttribute("href");
+                if (href) {
+                  window.location.href = href;
+                }
+              }
+            }, true);
+          });
+        }
+
+        const observer = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
+            mutation.addedNodes.forEach(function (node) {
+              if (node.nodeType === 1) {
+                patchDownloadButtons(node);
+              }
+            });
+          });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+          patchDownloadButtons(document);
+          observer.observe(document.body, { childList: true, subtree: true });
+        });
+      })();
+    </script>
   </body>
 </html>
